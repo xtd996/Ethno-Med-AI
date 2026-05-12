@@ -1,4 +1,9 @@
+from pathlib import Path
+
 from pydantic_settings import BaseSettings
+
+# 项目根目录的 .env 文件
+_ENV_FILE = Path(__file__).resolve().parents[2] / ".env"
 
 
 class Settings(BaseSettings):
@@ -22,8 +27,8 @@ class Settings(BaseSettings):
     openai_model: str = "gpt-4o-mini"
 
     # --- RAG ---
-    rag_data_root: str = "RAG/datasets"
-    rag_vector_store_path: str = "RAG/vector_store"
+    rag_data_root: str = str(Path(__file__).resolve().parents[2] / "rag" / "datasets")
+    rag_vector_store_path: str = str(Path(__file__).resolve().parents[2] / "rag" / "vector_store")
     rag_chunk_size: int = 300
     rag_chunk_overlap: int = 50
 
@@ -46,7 +51,7 @@ class Settings(BaseSettings):
     host: str = "0.0.0.0"
     port: int = 8000
 
-    model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
+    model_config = {"env_file": str(_ENV_FILE), "env_file_encoding": "utf-8"}
 
 
 settings = Settings()

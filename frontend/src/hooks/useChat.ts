@@ -7,6 +7,7 @@ import { createChatStream } from "@/lib/api";
 export function useChat() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [isStreaming, setIsStreaming] = useState(false);
+  const [isWaiting, setIsWaiting] = useState(false);
   const abortRef = useRef<AbortController | null>(null);
 
   const sendMessage = useCallback(
@@ -17,6 +18,7 @@ export function useChat() {
       const newMessages = [...messages, userMessage];
       setMessages(newMessages);
       setIsStreaming(true);
+      setIsWaiting(true);
 
       let assistantContent = "";
       const assistantMessage: ChatMessage = { role: "assistant", content: "" };
@@ -25,6 +27,7 @@ export function useChat() {
       abortRef.current = createChatStream(
         newMessages,
         (token) => {
+          if (isWaiting) setIsWaiting(false);
           assistantContent += token;
           setMessages([
             ...newMessages,
@@ -33,6 +36,7 @@ export function useChat() {
         },
         () => {
           setIsStreaming(false);
+          setIsWaiting(false);
           abortRef.current = null;
         },
         (error) => {
@@ -41,23 +45,30 @@ export function useChat() {
             { role: "assistant", content: `错误：${error}` },
           ]);
           setIsStreaming(false);
+          setIsWaiting(false);
           abortRef.current = null;
         }
       );
     },
-    [messages, isStreaming]
+    [messages, isStreaming, isWaiting]
   );
 
   const stopGeneration = useCallback(() => {
     abortRef.current?.abort();
     setIsStreaming(false);
+    setIsWaiting(false);
   }, []);
 
   const clearMessages = useCallback(() => {
     abortRef.current?.abort();
     setMessages([]);
     setIsStreaming(false);
+    setIsWaiting(false);
   }, []);
 
-  return { messages, isStreaming, sendMessage, stopGeneration, clearMessages };
+  const setMessagesDirectly = useCallback((msgs: ChatMessage[]) => {
+    setMessages(msgs);
+  }, []);
+
+  return { messages, isStreaming, isWaiting, sendMessage, stopGeneration, clearMessages, setMessagesDirectly };
 }

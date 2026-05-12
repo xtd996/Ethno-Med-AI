@@ -9,6 +9,24 @@ from langchain_core.embeddings import Embeddings
 
 from app.config import Settings
 
+
+def _read_index_safe(path: str) -> faiss.Index:
+    """读取 FAISS 索引，兼容 Windows 中文路径。
+
+    faiss C++ 的 FileIOReader 不支持非 ASCII 路径，
+    先复制到临时文件再读取。
+    """
+    import shutil
+    import tempfile
+
+    tmp = tempfile.NamedTemporaryFile(suffix=".index", delete=False)
+    try:
+        tmp.close()
+        shutil.copy2(path, tmp.name)
+        return faiss.read_index(tmp.name)
+    finally:
+        os.unlink(tmp.name)
+
 # 支持的民族列表
 ETHNIC_GROUPS: list[str] = ["藏族", "羌族", "彝族"]
 
@@ -58,7 +76,7 @@ def _load_single_store(
     if not os.path.exists(metadata_path):
         raise FileNotFoundError(f"元数据文件不存在: {metadata_path}")
 
-    index = faiss.read_index(index_path)
+    index = _read_index_safe(index_path)
     metadata = np.load(metadata_path, allow_pickle=True)
 
     documents = [

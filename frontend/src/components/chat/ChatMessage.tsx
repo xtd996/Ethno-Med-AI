@@ -5,9 +5,10 @@ import ReactMarkdown from "react-markdown";
 interface ChatMessageProps {
   role: "user" | "assistant";
   content: string;
+  isWaiting?: boolean;
 }
 
-export function ChatMessage({ role, content }: ChatMessageProps) {
+export function ChatMessage({ role, content, isWaiting }: ChatMessageProps) {
   const isUser = role === "user";
 
   return (
@@ -28,6 +29,12 @@ export function ChatMessage({ role, content }: ChatMessageProps) {
       >
         {isUser ? (
           <p className="leading-relaxed">{content}</p>
+        ) : isWaiting && !content ? (
+          <div className="flex items-center gap-1.5 py-1">
+            <span className="w-2 h-2 rounded-full bg-celadon-400 animate-bounce" style={{ animationDelay: "0ms" }} />
+            <span className="w-2 h-2 rounded-full bg-celadon-400 animate-bounce" style={{ animationDelay: "150ms" }} />
+            <span className="w-2 h-2 rounded-full bg-celadon-400 animate-bounce" style={{ animationDelay: "300ms" }} />
+          </div>
         ) : (
           <div className="prose prose-sm max-w-none prose-headings:font-display prose-headings:text-ink-800 prose-p:text-ink-600 prose-strong:text-ink-700 prose-code:bg-clay-100 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-sm">
             <ReactMarkdown>{content}</ReactMarkdown>

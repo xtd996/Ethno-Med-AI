@@ -6,6 +6,7 @@ interface SidebarProps {
   sessions: Session[];
   currentSessionId: string | null;
   selectedModel: string;
+  switching?: boolean;
   onSelectSession: (id: string) => void;
   onNewSession: () => void;
   onSwitchModel: (model: string) => void;
@@ -15,6 +16,7 @@ export function Sidebar({
   sessions,
   currentSessionId,
   selectedModel,
+  switching,
   onSelectSession,
   onNewSession,
   onSwitchModel,
@@ -35,13 +37,16 @@ export function Sidebar({
             <button
               key={model}
               onClick={() => onSwitchModel(model)}
-              className={`w-full text-left px-3 py-2.5 rounded-lg text-sm transition-all duration-200 ${
+              disabled={switching}
+              className={`w-full text-left px-3 py-2.5 rounded-lg text-sm transition-all duration-200 disabled:opacity-50 disabled:cursor-wait ${
                 selectedModel === model
                   ? "bg-clay-500 text-white shadow-sm"
                   : "text-ink-500 hover:bg-clay-100"
               }`}
             >
-              <span className="font-medium">{model}</span>
+              <span className="font-medium">
+                {switching && selectedModel !== model ? "切换中..." : model}
+              </span>
               <span className="block text-xs mt-0.5 opacity-70">
                 {model === "专业模型" ? "民族医药专业问答" : "日常聊天助手"}
               </span>
