@@ -1,13 +1,22 @@
 [tool.poetry]
 name = "ethno-med-ai"
-version = "0.1.0"
-description = ""
+version = "0.2.0"
+description = "少数民族医药问答系统 - Chinese Ethnic Minority Medicine Q&A System"
 authors = ["蒙奇_D_路飞 <2045705885@qq.com>"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11.9"
+python = "^3.11"
 
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.8"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "W"]
 
 [build-system]
 requires = ["poetry-core"]

@@ -2,32 +2,40 @@ services:
   backend:
     build:
       context: .
-      dockerfile: web/backend/Dockerfile
+      dockerfile: backend/Dockerfile
     image: ethno-med-ai-backend
-    container_name: backend
+    container_name: ethno-backend
+    env_file: .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./rag/datasets:/app/rag/datasets:ro
+      - ./rag/vector_store:/app/rag/vector_store:ro
     deploy:
       resources:
         reservations:
           devices:
             - driver: nvidia
               capabilities: [gpu]
-    ports:
-      - "8000:8000"
     networks:
       - ethno-med-ai-network
+    restart: unless-stopped
 
   frontend:
     build:
-      context: .
-      dockerfile: web/frontend/Dockerfile
+      context: ./frontend
+      dockerfile: Dockerfile
     image: ethno-med-ai-frontend
-    container_name: frontend
+    container_name: ethno-frontend
     ports:
-      - "8501:8501"
-    networks:
-      - ethno-med-ai-network
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://backend:8000
     depends_on:
       - backend
+    networks:
+      - ethno-med-ai-network
+    restart: unless-stopped
 
 networks:
   ethno-med-ai-network:

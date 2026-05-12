@@ -1,5 +1,0 @@
-操作指南
-
-step1    ollama serve
-step2   uvicorn app:app --reload  
-step3    streamlit run app.py 

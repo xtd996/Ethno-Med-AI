@@ -1,0 +1,50 @@
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&family=Noto+Serif+SC:wght@400;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-clay: #c08050;
+  --color-celadon: #6a9f5a;
+  --color-ink: #1a1a1a;
+  --color-paper: #fdf6f0;
+  --color-paper-dark: #f5e6d6;
+}
+
+body {
+  font-family: "Noto Sans SC", sans-serif;
+  background-color: var(--color-paper);
+  color: var(--color-ink);
+}
+
+/* 自定义滚动条 */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #d4a373;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #c08050;
+}
+
+/* 动画 */
+@keyframes fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fade-in 0.3s ease-out forwards;
+}
