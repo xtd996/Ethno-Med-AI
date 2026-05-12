@@ -9,7 +9,7 @@ packages = [{include = "app"}]
 [tool.poetry.dependencies]
 python = "^3.11"
 fastapi = "^0.115"
-uvicorn = {extras = ["standard"], version = "^0.34"}
+uvicorn = {extras = ["standard"], version = ">=0.34,<0.47"}
 pydantic-settings = "^2.6"
 langchain = "^0.3"
 langchain-core = "^0.3"
