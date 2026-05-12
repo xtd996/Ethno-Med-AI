@@ -1,0 +1,34 @@
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: web/backend/Dockerfile
+    image: shennong-llm-backend
+    container_name: backend
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [gpu]
+    ports:
+      - "8000:8000"
+    networks:
+      - shennong-llm-network
+
+  frontend:
+    build:
+      context: .
+      dockerfile: web/frontend/Dockerfile
+    image: shennong-llm-frontend
+    container_name: frontend
+    ports:
+      - "8501:8501"
+    networks:
+      - shennong-llm-network
+    depends_on:
+      - backend
+
+networks:
+  shennong-llm-network:
+    driver: bridge
