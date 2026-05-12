@@ -42,7 +42,6 @@ async def switch_model(request: Request, body: SwitchModelRequest) -> dict:
     try:
         result = create_llm(config, "professional" if model_name == "专业模型" else "living")
         request.app.state.current_llm = result["llm"]
-        request.app.state.current_tokenizer = result.get("tokenizer")
         request.app.state.current_model_name = model_name
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"模型加载失败: {e}")

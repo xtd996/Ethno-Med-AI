@@ -11,8 +11,9 @@ def mock_settings():
         llm_provider="dashscope",
         dashscope_api_key="test-key",
         dashscope_model="qwen-plus",
-        professional_model_path="/tmp/test-model",
-        living_model_path="/tmp/test-model",
+        local_model_base_url="http://localhost:8001/v1",
+        professional_model_name="test-model",
+        living_model_name="test-model",
         rag_vector_store_path="/tmp/test-vectors",
         embedding_provider="dashscope",
         embedding_model="text-embedding-v3",
@@ -36,7 +37,7 @@ def mock_app(mock_settings):
 
         mock_emb.return_value = MagicMock()
         mock_vs.return_value = {"藏族": MagicMock(), "羌族": MagicMock()}
-        mock_llm.return_value = {"llm": MagicMock(), "tokenizer": None}
+        mock_llm.return_value = {"llm": MagicMock()}
         mock_graph.return_value = MagicMock()
         mock_hybrid.return_value = {}
 

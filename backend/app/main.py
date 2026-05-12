@@ -43,26 +43,23 @@ async def lifespan(app: FastAPI):
     app.state.enable_reranker = config.enable_reranker
     print(f"混合检索器构建完成: {list(hybrid_retrievers.keys())}")
 
-    # 加载默认 LLM（专业模型）
-    print("正在加载默认模型（专业模型）...")
+    # 初始化默认 LLM（专业模型）
+    print("正在初始化默认模型（专业模型）...")
     try:
         llm_result = create_llm(config, "professional")
         app.state.current_llm = llm_result["llm"]
-        app.state.current_tokenizer = llm_result.get("tokenizer")
         app.state.current_model_name = "专业模型"
-        print("专业模型加载完成")
+        print("专业模型初始化完成")
     except Exception as e:
-        print(f"专业模型加载失败: {e}，尝试加载生活模型...")
+        print(f"专业模型初始化失败: {e}，尝试加载生活模型...")
         try:
             llm_result = create_llm(config, "living")
             app.state.current_llm = llm_result["llm"]
-            app.state.current_tokenizer = llm_result.get("tokenizer")
             app.state.current_model_name = "生活模型"
-            print("生活模型加载完成")
+            print("生活模型初始化完成")
         except Exception as e2:
-            print(f"生活模型也加载失败: {e2}，服务将启动但无法生成回答")
+            print(f"生活模型也初始化失败: {e2}，服务将启动但无法生成回答")
             app.state.current_llm = None
-            app.state.current_tokenizer = None
             app.state.current_model_name = None
 
     # 构建 LangGraph 对话图

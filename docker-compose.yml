@@ -1,16 +1,21 @@
 services:
-  backend:
-    build:
-      context: .
-      dockerfile: backend/Dockerfile
-    image: ethno-med-ai-backend
-    container_name: ethno-backend
+  # ── 模型推理服务（vLLM）──
+  # 启动前请确认模型路径，或在 .env 中配置 MODEL_PATH
+  vllm:
+    image: vllm/vllm-openai:latest
+    container_name: ethno-vllm
     env_file: .env
     ports:
-      - "8000:8000"
+      - "8001:8001"
     volumes:
-      - ./rag/datasets:/app/rag/datasets:ro
-      - ./rag/vector_store:/app/rag/vector_store:ro
+      - ${MODEL_PATH:-./model}:/model:ro
+    command: >
+      --model /model/${PROFESSIONAL_MODEL_NAME:-deepseek-r1-7b}
+      --served-model-name ${PROFESSIONAL_MODEL_NAME:-deepseek-r1-7b}
+      --host 0.0.0.0
+      --port 8001
+      --dtype auto
+      --max-model-len 4096
     deploy:
       resources:
         reservations:
@@ -21,6 +26,28 @@ services:
       - ethno-med-ai-network
     restart: unless-stopped
 
+  # ── 后端 API 服务 ──
+  backend:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile
+    image: ethno-med-ai-backend
+    container_name: ethno-backend
+    env_file: .env
+    ports:
+      - "8000:8000"
+    environment:
+      - LOCAL_MODEL_BASE_URL=http://vllm:8001/v1
+    volumes:
+      - ./rag/datasets:/app/rag/datasets:ro
+      - ./rag/vector_store:/app/rag/vector_store:ro
+    depends_on:
+      - vllm
+    networks:
+      - ethno-med-ai-network
+    restart: unless-stopped
+
+  # ── 前端 ──
   frontend:
     build:
       context: ./frontend

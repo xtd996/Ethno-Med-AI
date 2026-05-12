@@ -1,18 +1,24 @@
 from typing import Any
 
+from langchain_openai import ChatOpenAI
+
 from app.config import Settings
 
 
 def create_llm(settings: Settings, model_type: str = "professional") -> dict[str, Any]:
     """根据配置创建 LLM 实例。
 
+    三种 provider 统一使用 OpenAI 兼容 API：
+    - local:     指向 vLLM/SGLang/TGI 等本地推理框架
+    - dashscope: 阿里云 DashScope（也兼容 OpenAI 接口）
+    - openai:    OpenAI 或任何兼容 API
+
     Args:
         settings: 应用配置
         model_type: "professional" 或 "living"
 
     Returns:
-        包含 "llm" 和可选 "tokenizer" 键的字典。
-        对于本地模型，tokenizer 用于 chat template 格式化。
+        {"llm": ChatOpenAI} 字典
     """
     provider = settings.llm_provider
 
@@ -27,51 +33,24 @@ def create_llm(settings: Settings, model_type: str = "professional") -> dict[str
 
 
 def _create_local_llm(settings: Settings, model_type: str) -> dict[str, Any]:
-    """创建本地 HuggingFace 模型。"""
-    import torch
-    from transformers import AutoModelForCausalLM, AutoTokenizer, pipeline as hf_pipeline
+    """调用本地 vLLM/SGLang/TGI 推理服务（OpenAI 兼容 API）。
 
-    model_path = (
-        settings.professional_model_path
+    前提：已通过 vLLM 等框架独立部署模型服务，例如：
+        vllm serve deepseek-r1-7B --port 8001
+    """
+    model_name = (
+        settings.professional_model_name
         if model_type == "professional"
-        else settings.living_model_path
+        else settings.living_model_name
     )
 
-    tokenizer = AutoTokenizer.from_pretrained(model_path, local_files_only=True)
-
-    # 修复 pad_token（与原 backend.py 逻辑一致）
-    if tokenizer.pad_token_id is None or tokenizer.pad_token_id == tokenizer.eos_token_id:
-        tokenizer.pad_token = "[PAD]"
-        tokenizer.pad_token_id = tokenizer.convert_tokens_to_ids("[PAD]")
-        if tokenizer.pad_token_id is None:
-            tokenizer.add_special_tokens({"pad_token": "[PAD]"})
-
-    model = AutoModelForCausalLM.from_pretrained(
-        model_path,
-        local_files_only=True,
-        torch_dtype=torch.float16 if torch.cuda.is_available() else torch.float32,
-        device_map="auto",
+    llm = ChatOpenAI(
+        model=model_name,
+        api_key=settings.local_model_api_key,
+        base_url=settings.local_model_base_url,
+        streaming=True,
     )
-
-    if tokenizer.pad_token_id is None:
-        model.resize_token_embeddings(len(tokenizer))
-
-    pipe = hf_pipeline(
-        task="text-generation",
-        model=model,
-        tokenizer=tokenizer,
-        max_new_tokens=1024,
-        repetition_penalty=1.1,
-        temperature=0.7,
-        top_p=0.9,
-        pad_token_id=tokenizer.pad_token_id,
-        eos_token_id=tokenizer.eos_token_id,
-    )
-
-    from langchain_huggingface import HuggingFacePipeline
-
-    llm = HuggingFacePipeline(pipeline=pipe)
-    return {"llm": llm, "tokenizer": tokenizer}
+    return {"llm": llm}
 
 
 def _create_dashscope_llm(settings: Settings) -> dict[str, Any]:
@@ -88,8 +67,6 @@ def _create_dashscope_llm(settings: Settings) -> dict[str, Any]:
 
 def _create_openai_llm(settings: Settings) -> dict[str, Any]:
     """创建 OpenAI 兼容 API LLM。"""
-    from langchain_openai import ChatOpenAI
-
     llm = ChatOpenAI(
         model=settings.openai_model,
         api_key=settings.openai_api_key or None,

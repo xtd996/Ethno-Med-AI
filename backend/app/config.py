@@ -2,12 +2,15 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    # --- 模型路径 ---
-    professional_model_path: str = "model/deepseek-r1-7B"
-    living_model_path: str = "model/qwen-chat-7b"
-
     # --- LLM 提供商: "local" | "dashscope" | "openai" ---
+    # "local" 指向 vLLM/SGLang/TGI 等推理框架暴露的 OpenAI 兼容 API
     llm_provider: str = "local"
+
+    # --- 本地模型推理服务（vLLM / SGLang / TGI）---
+    local_model_base_url: str = "http://localhost:8001/v1"
+    local_model_api_key: str = "not-needed"
+    professional_model_name: str = "deepseek-r1-7b"
+    living_model_name: str = "qwen-chat-7b"
 
     # --- DashScope (通义千问) ---
     dashscope_api_key: str = ""

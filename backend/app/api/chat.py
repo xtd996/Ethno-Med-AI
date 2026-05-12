@@ -24,7 +24,6 @@ async def chat(request: Request, body: ChatRequest):
 
     # 获取当前 LLM 和 graph
     llm = request.app.state.current_llm
-    tokenizer = getattr(request.app.state, "current_tokenizer", None)
     graph = request.app.state.chat_graph
     vector_stores = request.app.state.vector_stores
     model_name = request.app.state.current_model_name
@@ -42,7 +41,6 @@ async def chat(request: Request, body: ChatRequest):
     runtime_config = {
         "configurable": {
             "llm": llm,
-            "tokenizer": tokenizer,
             "vector_stores": vector_stores,
             "hybrid_retrievers": getattr(request.app.state, "hybrid_retrievers", {}),
             "enable_reranker": getattr(request.app.state, "enable_reranker", False),
