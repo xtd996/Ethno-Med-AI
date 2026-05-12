@@ -3,7 +3,7 @@ services:
     build:
       context: .
       dockerfile: web/backend/Dockerfile
-    image: shennong-llm-backend
+    image: ethno-med-ai-backend
     container_name: backend
     deploy:
       resources:
@@ -14,21 +14,21 @@ services:
     ports:
       - "8000:8000"
     networks:
-      - shennong-llm-network
+      - ethno-med-ai-network
 
   frontend:
     build:
       context: .
       dockerfile: web/frontend/Dockerfile
-    image: shennong-llm-frontend
+    image: ethno-med-ai-frontend
     container_name: frontend
     ports:
       - "8501:8501"
     networks:
-      - shennong-llm-network
+      - ethno-med-ai-network
     depends_on:
       - backend
 
 networks:
-  shennong-llm-network:
+  ethno-med-ai-network:
     driver: bridge
